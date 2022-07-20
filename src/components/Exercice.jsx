@@ -49,8 +49,7 @@ const Icon = styled.img`
 
 const Exercice = ({ item, getExercices }) => {
   const navigator = useNavigate();
-  const { coach, setCoach } = useApp();
-  const [favoritesList, setFavoritesList] = useState([coach.favorites]);
+  const { coach, setCoach, favoritesExercicesList } = useApp();
 
   const onSearch = () => {
     navigator(`/exercices/${item._id}`);
@@ -69,9 +68,8 @@ const Exercice = ({ item, getExercices }) => {
 
   useEffect(() => {
     getExercices();
-    console.log(favoritesList);
-    console.log('id', coach._id);
-  }, [coach]);
+    console.log('favoritesExercicesList', favoritesExercicesList);
+  }, []);
 
   const getCoachData = async () => {
     const res = await axios.get(
@@ -80,36 +78,38 @@ const Exercice = ({ item, getExercices }) => {
     setCoach(res.data);
   };
 
-  const handleAddFavorite = async (itemId) => { 
-    
+  const handleAddFavorite = async (itemId) => {
+    console.log('favoritesExercicesList', favoritesExercicesList);
     try {
-      const getCoach = localStorage.getItem('coach');
-      const coachFavorites = getCoach ? JSON.parse(getCoach) : {};
-      console.log(coachFavorites)
-      if(coachFavorites.favorites.includes(itemId)) {
-      await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/coach/addFavorites/${coach._id}`,
-        {
-          newFavorite: itemId,
-        }
-      );}
-      getCoachData();
-      coachFavorites.favorites.push(itemId);
-      localStorage.setItem('coach', JSON.stringify(coachFavorites));
-      alert(`exercices added`);
-      
+      await axios
+        .post(
+          `${process.env.REACT_APP_API_URL}/api/coach/favoritesExercices/${coach._id}`,
+          {
+            newFavoriteExId: itemId,
+          }
+        )
+        .then(() => {
+          getCoachData();
+          favoritesExercicesList.push(itemId);
+          localStorage.setItem(
+            'favoritesExercicesList',
+            JSON.stringify(favoritesExercicesList)
+          );
+          alert(`New Favorites Exercices added`);
+        });
     } catch (err) {
       console.log(err);
     }
-  }
+  };
 
-  ;
   function onRemoveFavorites(itemId) {
-    const getCoach = localStorage.getItem('coach');
-    const coachFavorites = getCoach ? JSON.parse(getCoach) : {};
+    const getsetfavoritesExercicesList = localStorage.getItem('coach');
+    const coachFavorites = getsetfavoritesExercicesList
+      ? JSON.parse(getsetfavoritesExercicesList)
+      : {};
     let index = coachFavorites.favorites.indexOf(itemId);
     coachFavorites.favorites.slice(index, 1);
-    
+
     localStorage.setItem('coach', JSON.stringify(coachFavorites));
     alert(`exercices delete`);
   }
@@ -123,11 +123,23 @@ const Exercice = ({ item, getExercices }) => {
         <IconContainer>
           <Icon src={search} onClick={onSearch} />
           <Icon src={edit} onClick={onEdit} />
-          {coach.favorites.includes(item._id) && (
-            <Icon src={heart} onClick={() => onRemoveFavorites(item._id)} />
+          {favoritesExercicesList?.includes(item._id) && (
+            <Icon
+              src={heart}
+              onClick={(e) => {
+                onRemoveFavorites(item._id);
+                e.stopPropagation();
+              }}
+            />
           )}
-          {!coach.favorites.includes(item._id) && (
-            <Icon src={heartVide} onClick={() => handleAddFavorite(item._id)} />
+          {!favoritesExercicesList?.includes(item._id) && (
+            <Icon
+              src={heartVide}
+              onClick={(e) => {
+                handleAddFavorite(item._id);
+                e.stopPropagation();
+              }}
+            />
           )}
           <Icon src={poubelle} onClick={() => handleReset(item._id)} />
         </IconContainer>

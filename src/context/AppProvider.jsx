@@ -8,21 +8,42 @@ const AppProvider = ({ children }) => {
       ? JSON.parse(localStorage.getItem('coach'))
       : null
   );
-  
+  const [favoritesExercicesList, setfavoritesExercicesList] = useState(
+    localStorage.getItem('favoritesExercicesList')
+      ? JSON.parse(localStorage.getItem('favoritesExercicesList'))
+      : null
+  );
+
+  useEffect(() => {
+    if (favoritesExercicesList) {
+      localStorage.setItem(
+        'favoritesExercicesList',
+        JSON.stringify(favoritesExercicesList)
+      );
+    } else {
+      localStorage.removeItem('favoritesExercicesList');
+    }
+  }, [favoritesExercicesList]);
+
   useEffect(() => {
     if (coach) {
       localStorage.setItem('coach', JSON.stringify(coach));
     } else {
       localStorage.removeItem('coach');
     }
+
+
+
   }, [coach]);
 
   const AppStates = useMemo(
     () => ({
       coach,
       setCoach,
+      favoritesExercicesList,
+      setfavoritesExercicesList,
     }),
-    [coach]
+    []
   );
 
   return (
