@@ -43,7 +43,7 @@ const AppProvider = ({ children }) => {
       favoritesExercicesList,
       setfavoritesExercicesList,
     }),
-    []
+    [coach,favoritesExercicesList]
   );
 
   return (
